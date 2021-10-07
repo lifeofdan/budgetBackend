@@ -33,9 +33,77 @@ namespace budgetBackend.Controllers
         }
 
         // POST action
+        [HttpPost]
+        public IActionResult Create(BankAccount bankAccount)
+        {
+            BankAccountService.Add(bankAccount);
+            return CreatedAtAction(nameof(Create), new { id = bankAccount.Id }, bankAccount);
+        }
 
         // PUT action
+        [HttpPut("{id}")]
+        public IActionResult Update(int id, BankAccount bankAccount)
+        {
+            // This code will update the pizza and return a result
+
+            var existingBankAccount = BankAccountService.Get(id);
+            
+            if (existingBankAccount is null)
+                return NotFound();
+
+            existingBankAccount.AccountId = bankAccount.AccountId;
+
+            BankAccountService.Save(existingBankAccount);
+
+            return Ok(BankAccountService.Get(id));
+        }
+
+        [HttpPut("{id}/deposit={ammount}")]
+        public IActionResult MakeDeposit(int id, int ammount)
+        {
+            var existingBankAccount = BankAccountService.Get(id);
+
+            if(existingBankAccount is null)
+                return NotFound();
+
+            existingBankAccount.MakeDeposit(ammount);
+
+            return Ok(BankAccountService.Get(id));
+        }
+
+        [HttpPut("{id}/withdraw={ammount}")]
+        public IActionResult MakeWithdrawl(int id, int ammount)
+        {
+            var existingBankAccount = BankAccountService.Get(id);
+
+            if(existingBankAccount is null)
+                return NotFound();
+
+            try
+            {
+                existingBankAccount.MakeWithdrawl(ammount);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+           
+            return Ok(BankAccountService.Get(id));
+        }
 
         // DELETE action
+        [HttpDelete("{id}")]
+        public IActionResult Delete(int id)
+        {
+            var bankAccount = BankAccountService.Get(id);
+
+            if (bankAccount is null)
+                return NotFound();
+            
+            // This code will delete the bank account and return a result.
+            BankAccountService.Remove(id);
+
+            return NoContent();
+        }
     }
 }
